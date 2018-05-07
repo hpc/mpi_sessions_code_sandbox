@@ -1,0 +1,4 @@
+Build with
+> mpicc -c libCFG.c -o libCFG
+and
+> mpicc -c libCFG_noMCW -o libCFG_noMCW

@@ -1,0 +1,2 @@
+The University of Edinburgh is a charitable body, registered in
+Scotland, with registration number SC005336.
