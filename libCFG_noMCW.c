@@ -1,7 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <mpi.h>
 
 int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, int tag, MPI_Comm *comm) {
     int groupRank, groupSize;
+    MPI_Group localGroup;
     MPI_Group_rank(group, &groupRank);
     MPI_Group_size(group, &groupSize);
     if (MPI_UNDEFINED == groupRank || 0==groupSize) {
@@ -19,7 +22,6 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, int tag, MPI_Comm *comm) {
     if (localSize < groupSize) {
         char port[MPI_MAX_PORT_NAME];
         MPI_Open_port(MPI_INFO_NULL, &port[0]);
-	MPI_Group localGroup;
         while (localSize < groupSize) {
             MPI_Comm_group(localComm, &localGroup);
             int zero = 0, localRank;
@@ -43,3 +45,34 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, int tag, MPI_Comm *comm) {
     *comm = localComm;
     return MPI_SUCCESS;
 }
+
+int main(int argc, char **argv)
+{
+    int i, n,  my_wrank, wsize, *granks = NULL;
+    MPI_Group wgroup, newgroup;
+    MPI_Comm new_comm;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_group(MPI_COMM_WORLD, &wgroup);
+    MPI_Comm_size(MPI_COMM_WORLD, &wsize);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_wrank);
+
+    granks = (int *)malloc(sizeof(int) * ((wsize + 1)/2));
+    for (i = 0, n = 0; i < wsize; i+=2) {
+        granks[n] = i;
+        n++;
+    }
+
+    MPI_Group_incl(wgroup, (wsize + 1)/2, granks, &newgroup);
+    if (my_wrank % 2 == 0) {
+        fprintf(stderr, "process %d (MPI_COMM_WORLD) calling from group thingy\n", my_wrank);
+        MPIX_COMM_CREATE_FROM_GROUP(newgroup, 10, &new_comm);
+        fprintf(stderr, "process %d (MPI_COMM_WORLD) now calling barrier \n",
+                my_wrank);
+        MPI_Barrier(new_comm);
+        fprintf(stderr, "process %d (MPI_COMM_WORLD) called barrier \n",
+                my_wrank);
+    }
+
+    MPI_Finalize();
+}
+

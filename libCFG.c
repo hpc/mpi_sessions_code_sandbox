@@ -59,7 +59,7 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, int tag, MPI_Comm *comm) {
 
 int main(int argc, char **argv)
 {
-    int i, my_wrank, my_grank, wsize, *granks = NULL;
+    int i, n,  my_wrank, wsize, *granks = NULL;
     MPI_Group wgroup, newgroup;
     MPI_Comm new_comm;
     MPI_Init(&argc, &argv);
@@ -68,20 +68,21 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &my_wrank);
 
     granks = (int *)malloc(sizeof(int) * ((wsize + 1)/2));
-    for (i = 0; i < wsize; i+=2) {
-        granks[i] = i;
+    for (i = 0, n = 0; i < wsize; i+=2) {
+        granks[n] = i;
+        n++;
     }
 
     MPI_Group_incl(wgroup, (wsize + 1)/2, granks, &newgroup);
-    MPI_Group_rank(newgroup,&my_grank);
-    if (my_grank != MPI_PROC_NULL) {
+    if (my_wrank % 2 == 0) {
         fprintf(stderr, "process %d (MPI_COMM_WORLD) calling from group thingy\n", my_wrank);
-        MPIX_COMM_CREATE_FROM_GROUP(newgroup, 10, &new_comm) {
+        MPIX_COMM_CREATE_FROM_GROUP(newgroup, 10, &new_comm);
         fprintf(stderr, "process %d (MPI_COMM_WORLD) now calling barrier \n",
                 my_wrank);
         MPI_Barrier(new_comm);
         fprintf(stderr, "process %d (MPI_COMM_WORLD) called barrier \n",
                 my_wrank);
     }
+
     MPI_Finalize();
 }
