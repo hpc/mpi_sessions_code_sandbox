@@ -46,7 +46,6 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
                 MPI_Comm_disconnect(&interComm);
             } else {
                 fprintf(stderr, "rank %d accepting on port %s\n", my_wrank, port);
-                MPI_Open_port(MPI_INFO_NULL, &port[0]);
                 MPI_Comm_accept(port, MPI_INFO_NULL, 0, localComm, &interComm);
                 MPI_Comm_free(&localComm);
                 fprintf(stderr, "rank %d merging intercomm \n", my_wrank);
