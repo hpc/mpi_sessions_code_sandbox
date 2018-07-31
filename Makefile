@@ -5,7 +5,8 @@ CC = mpicc
 PROGRAMS = \
 	 libCFG \
 	 libCFG_noMCW \
-	 libCFG_noMCW_ac
+	 libCFG_noMCW_ac \
+	 libCFG_noMCW_multiport
 
 all: $(PROGRAMS)
 
@@ -19,4 +20,6 @@ libCFG: libCFG.c
 libCFG_noMCW: libCFG_noMCW.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $? $(LDLIBS) -o $@
 libCFG_noMCW_ac: libCFG_noMCW_ac.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $? $(LDLIBS) -o $@
+libCFG_noMCW_multiport: libCFG_noMCW_multiport.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $? $(LDLIBS) -o $@
