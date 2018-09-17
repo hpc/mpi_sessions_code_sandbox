@@ -3,6 +3,12 @@
 #include <unistd.h>
 #include <mpi.h>
 
+#ifdef NO_STAGGERED_DELAY
+#define MY_SLEEP_DELAY (1)
+#else
+#define MY_SLEEP_DELAY (1+my_wrank)
+#endif
+
 int my_wrank;
 
 int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm) {
@@ -30,7 +36,7 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
         MPI_Group_translate_ranks(group, 1, &zero, localGroup, &localRank);
         if (MPI_UNDEFINED == localRank) {
             fprintf(stderr, "rank %d sleeping for %d seconds\n", my_wrank, 1 + my_wrank);
-            sleep(1+my_wrank); /* temporary till we do better error code return values */
+            sleep(MY_SLEEP_DELAY);
             fprintf(stderr, "rank %d looking up port using name %s\n", my_wrank, tag);
             MPI_Lookup_name(tag, MPI_INFO_NULL, port);
             fprintf(stderr, "rank %d looked up port %s using name %s\n", my_wrank, port, tag);
