@@ -36,8 +36,8 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
         MPI_Group_translate_ranks(group, 1, &zero, localGroup, &localRank);
         if (MPI_UNDEFINED == localRank) {
             fprintf(stderr, "rank %d sleeping for %d seconds\n", my_wrank, MY_SLEEP_DELAY);
-            sleep(MY_SLEEP_DELAY); /* temporary till we do better error code return values */
             fprintf(stderr, "rank %d looking up port using name %s\n", my_wrank, tag);
+            sleep(1);
             MPI_Lookup_name(tag, MPI_INFO_NULL, port);
             fprintf(stderr, "rank %d looked up port %s using name %s\n", my_wrank, port, tag);
         } else {
@@ -52,17 +52,17 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
             MPI_Group_translate_ranks(group, 1, &zero, localGroup, &localRank);
             MPI_Comm interComm;
             if (MPI_UNDEFINED == localRank) {
-                fprintf(stderr, "rank %d accepting to port %s (localSize %d)\n", my_wrank, port, localSize);
-                MPI_Comm_accept(port, MPI_INFO_NULL, 0, localComm, &interComm);
-                fprintf(stderr, "rank %d accepted using port %s (localSize %d)\n", my_wrank, port, localSize);
+                fprintf(stderr, "rank %d connecting on port %s (localSize %d)\n", my_wrank, port, localSize);
+                MPI_Comm_connect(port, MPI_INFO_NULL, 0, localComm, &interComm);
+                fprintf(stderr, "rank %d connected using port %s (localSize %d)\n", my_wrank, port, localSize);
                 MPI_Comm_free(&localComm);
                 fprintf(stderr, "rank %d merging intercomm (high group)\n", my_wrank);
                 MPI_Intercomm_merge(interComm, 1, &localComm);
                 fprintf(stderr, "rank %d merged intercomm (high group)\n", my_wrank);
             } else {
-                fprintf(stderr, "rank %d connecting on port %s (localSize %d)\n", my_wrank, port, localSize);
-                MPI_Comm_connect(port, MPI_INFO_NULL, 0, localComm, &interComm);
-                fprintf(stderr, "rank %d connected using port %s (localSize %d)\n", my_wrank, port, localSize);
+                fprintf(stderr, "rank %d accepting to port %s (localSize %d)\n", my_wrank, port, localSize);
+                MPI_Comm_accept(port, MPI_INFO_NULL, 0, localComm, &interComm);
+                fprintf(stderr, "rank %d accepted using port %s (localSize %d)\n", my_wrank, port, localSize);
                 MPI_Comm_free(&localComm);
                 fprintf(stderr, "rank %d merging intercomm (low group)\n", my_wrank);
                 MPI_Intercomm_merge(interComm, 0, &localComm);
@@ -101,8 +101,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "process %d (MPI_COMM_WORLD) now calling barrier on new_comm\n", my_wrank);
         MPI_Barrier(new_comm);
         fprintf(stderr, "process %d (MPI_COMM_WORLD) done barrier on new_comm\n", my_wrank);
-    } else {
-        sleep(20);
     }
 
     fprintf(stderr, "process %d (MPI_COMM_WORLD) now calling barrier on MPI_COMM_WORLD\n", my_wrank);

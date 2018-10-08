@@ -17,6 +17,7 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
     int groupRank, groupSize;
     int zero = 0, localRank;
     int localSize;
+    int higherRank;
     char port[MPI_MAX_PORT_NAME];
     char name[MAX_NAME_LEN];
     MPI_Comm interComm;
@@ -37,7 +38,7 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
     fprintf(stderr, "rank %d non-trivial use-case: target group size %d, localGroup size %d\n", my_wrank, groupSize, localSize);
 
     if (0<groupRank) {
-        int len = snprintf(name, MAX_NAME_LEN, "%s round %d", tag, groupRank);
+        int len = snprintf(name, MAX_NAME_LEN, "%sround%d", tag, groupRank);
         if (len<0 || len>=MAX_NAME_LEN) MPI_Abort(MPI_COMM_WORLD, -100);
 
         fprintf(stderr, "rank %d opening port\n", my_wrank);
@@ -69,8 +70,8 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
         sleep(1); // rank 0 only
     }
 
-    for (int higherRank = groupRank + 1; higherRank < groupSize; ++higherRank) {
-        int len = snprintf(name, MAX_NAME_LEN, "%s round %d", tag, higherRank);
+    for (higherRank = groupRank + 1; higherRank < groupSize; ++higherRank) {
+        int len = snprintf(name, MAX_NAME_LEN, "%sround%d", tag, higherRank);
         if (len<0 || len>=MAX_NAME_LEN) MPI_Abort(MPI_COMM_WORLD, -101);
 
         fprintf(stderr, "rank %d looking up port using name %s\n", my_wrank, name);
