@@ -52,17 +52,17 @@ int MPIX_COMM_CREATE_FROM_GROUP(MPI_Group group, const char *tag, MPI_Comm *comm
             MPI_Group_translate_ranks(group, 1, &zero, localGroup, &localRank);
             MPI_Comm interComm;
             if (MPI_UNDEFINED == localRank) {
-                fprintf(stderr, "rank %d accepting to port %s (localSize %d)\n", my_wrank, port, localSize);
-                MPI_Comm_accept(port, MPI_INFO_NULL, 0, localComm, &interComm);
-                fprintf(stderr, "rank %d accepted using port %s (localSize %d)\n", my_wrank, port, localSize);
+                fprintf(stderr, "rank %d connecting on port %s (localSize %d)\n", my_wrank, port, localSize);
+                MPI_Comm_connect(port, MPI_INFO_NULL, 0, localComm, &interComm);
+                fprintf(stderr, "rank %d connected using port %s (localSize %d)\n", my_wrank, port, localSize);
                 MPI_Comm_free(&localComm);
                 fprintf(stderr, "rank %d merging intercomm (high group)\n", my_wrank);
                 MPI_Intercomm_merge(interComm, 1, &localComm);
                 fprintf(stderr, "rank %d merged intercomm (high group)\n", my_wrank);
             } else {
-                fprintf(stderr, "rank %d connecting on port %s (localSize %d)\n", my_wrank, port, localSize);
-                MPI_Comm_connect(port, MPI_INFO_NULL, 0, localComm, &interComm);
-                fprintf(stderr, "rank %d connected using port %s (localSize %d)\n", my_wrank, port, localSize);
+                fprintf(stderr, "rank %d accepting to port %s (localSize %d)\n", my_wrank, port, localSize);
+                MPI_Comm_accept(port, MPI_INFO_NULL, 0, localComm, &interComm);
+                fprintf(stderr, "rank %d accepted using port %s (localSize %d)\n", my_wrank, port, localSize);
                 MPI_Comm_free(&localComm);
                 fprintf(stderr, "rank %d merging intercomm (low group)\n", my_wrank);
                 MPI_Intercomm_merge(interComm, 0, &localComm);
